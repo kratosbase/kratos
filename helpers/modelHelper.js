@@ -1,6 +1,6 @@
 import mongoose from "mongoose"
 
-export async function get(model, options) {
+export async function find(model, options) {
     const validID = mongoose.Types.ObjectId.isValid(options.id)
 
     if (options.type == 'one' && validID) {
@@ -9,13 +9,13 @@ export async function get(model, options) {
                 if (response) {
                     return response
                 } else {
-                    return false
+                    return 404
                 }
             })
             .catch((e) => {
-                console.log(e)
+                //console.log(e)
 
-                return 'error'
+                return 500
             })
     } else if (options.type == 'all') {
         return await model.find()
@@ -23,86 +23,87 @@ export async function get(model, options) {
                 if (response) {
                     return response
                 } else {
-                    return false
+                    return 404
                 }
             })
             .catch((e) => {
-                console.log(e)
+                //console.log(e)
 
-                return 'error'
+                return 500
             })
     } else {
         return false
     }
 }
 
-export async function create(data, model) {
-    const dataExists = await exists(data, model)
+export async function create(model, options) {
+    const dataExists = await exists(options.data, model)
 
     if (!dataExists) {
-        return await model.create(data)
+        return await model.create(options.data)
             .then((response) => {
                 if (response) {
-                    return true
+                    return 200
                 } else {
-                    return false
+                    return 400
                 }
             })
             .catch(e => { 
-                console.log(e); 
-                return 'error'
+                console.log(e) 
+                
+                return 500
             })
     } else {
         return 'duplicate'
     }
 }
 
-export async function update(id, data, model) {
-    const validID = mongoose.Types.ObjectId.isValid(id)
+export async function update(model, options) {
+    const validID = mongoose.Types.ObjectId.isValid(options.id)
 
     if (!validID) {
         return false
     }
 
-    const dataExists = await exists(data, model)
+    const dataExists = await exists(options.data, model)
 
     if (dataExists) {
-        return 'error_exists'
+        return 'duplicate'
     }
 
-    return await model.updateOne({_id: id.toObjectId()}, data)
+    return await model.updateOne({_id: options.id.toObjectId()}, options.data)
     .then(response => {
         if (response.modifiedCount == 1) {
-            return true
+            return 200
         } else {
-            return 'error_update'
+            return 400
         }
     })
     .catch(e => {
         //console.log(e)
-        return 'error'
+        return 500
     })
 }
 
-export async function remove(id, model) {
-    const validID = mongoose.Types.ObjectId.isValid(id)
+export async function remove(model, options) {
+    const validID = mongoose.Types.ObjectId.isValid(options.id)
 
     if (!validID) {
         return false
     }
     
-    return await model.findByIdAndDelete(id)
+    return await model.findByIdAndDelete(options.id)
     .then((response) => {
         if (response) {
-            return true
+            return 200
         } else {
-            return false
+            return 404
         }
     })
     .catch((e) => {
         //console.log(e)
 
-        return 'error'
+        return 500
     })
 }
 

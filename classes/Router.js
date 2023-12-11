@@ -1,186 +1,165 @@
 import express from 'express'
 import Joi from "joi"
+import mongoose from 'mongoose'
 import * as modelHelper from '../helpers/modelHelper.js'
+import getResponse from '../helpers/responseHelper.js'
 
 /**
  * Router class
  */
 export default class Router {
+    #router = express.Router()
+
     /**
      * Initialize a new Router instance
      *
-     * @param {Object} models Object containing models
+     * @param {Object} schemas Schemas object
      */
-    constructor(models) {
-        this.router = express.Router()
-        this.models = models
+    constructor(schemas) {
+        this.schemas = schemas
+
+        Object.keys(this.schemas).forEach(key => {
+            this.schemas[key].model = mongoose.model(key, new mongoose.Schema(this.schemas[key].schema))
+        })
     }
 
     /**
-     * Create different HTTP endpoints for the provided models
+     * Create different HTTP endpoints based on provided schema objects
      *
      * @return {Object} returns router object
      */
     getRoutes() {
-        this.#getRoute('/', 'get')
+        // Create
+        this.#getRoute('/', 'post')
 
+        // Read
+        this.#getRoute('/', 'get')
         this.#getRoute('/:id', 'get')
 
-        return this.router
+        // Update
+        this.#getRoute('/:id', 'patch')
+
+        // Delete
+        this.#getRoute('/:id', 'delete')
+
+        return this.#router
     }
 
-    // Return routing logic based on endpoint and HTTP request type
-    #getRoute(endpoint, type) {
-        return this.router[type](endpoint, async (req, res) => {
-            // Get validation rules
-            const modelObj = this.#getModel(req)
-            const validationRules = modelObj.validationRules
+    // Return routing logic based on router param and HTTP request type
+    #getRoute(param, type) {
+        return this.#router[type](param, async (req, res) => {
+            // URL endpoint
+            const endpoint = this.#getEndpoint(req)
 
-            console.log(modelObj.model)
-
-            if (!modelObj.model) {
-                throw new Error('A model was not specified in the model object of the resource you are trying to consume.')
-            }
-
-            // Determine HTTP response based on model return value
-            const response = async (modelResponse) => {
-                //console.log(modelResponse)
-                if (typeof modelResponse === 'object' || modelResponse === true) {
-                    return await this.#getResponse(200, res, modelResponse)
-                } else if (modelResponse === false) {
-                    return await this.#getResponse(404, res)
-                } else {
-                    return await this.#getResponse(500, res)
-                }
-            }
-
-            // Check if resource validation rules exist
-            if (validationRules) {
-                // combine the req.body and req.params payloads into one
-                const payload = {}
-
-                Object.keys(req.body).forEach((key) => {
-                    payload[key] = req.body[key]
-                })
-
-                Object.keys(req.params).forEach((key) => {
-                    payload[key] = req.params[key]
-                })
-
-                // Validate the payload based on the resource validation rules
-                const schema = Joi.object(validationRules).validate(payload)
+            // Log the request
+            console.log(`${type} /${endpoint.toLowerCase()}${(req.params.id) ? '/' + req.params.id : ''}`)
             
-                const { error, value } = schema
+            // Schema Object
+            const schemaObj = this.#getSchema(endpoint)
 
-                if (error) {
-                    return res.status(400).send({ status: 400, message: error.details[0].message })
-                } else {
-                    // Return HTTP response based on database query result
-                    return response(await this.#queryDB(type, req, modelObj.model, {
-                        data: value
-                    }))
-                }
+            if (!schemaObj.schema) {
+                return getResponse(404, res)
+            }
+
+            // Validation rules
+            const schemaValidationRules = schemaObj.validationRules[type]
+            const localValidationRules = (param && param == '/:id') ? {
+                id: Joi.string().trim().required()
+            } : {}
+
+            // Merge both validation rules
+            const validationRules = this.#mergeObjects(schemaValidationRules, localValidationRules)
+
+            // combine the req.body and req.params payloads into one
+            const payload = this.#mergeObjects(req.body, req.params)
+
+            // Validate the payload based on the resource validation rules
+            const schema = Joi.object(validationRules).validate(payload)
+        
+            const { error, value } = schema
+
+            if (error) {
+                return res.status(400).send({ status: 400, message: error.details[0].message })
             } else {
-                // Query db without payload
-                return response(await this.#queryDB(type, req, modelObj.model))
+                const queryResult = await this.#queryDB(type, req, schemaObj.model, {
+                    id: (value.id) ? value.id : undefined,
+                    type: (param == '/:id') ? 'one' : 'all',
+                    data: value
+                })
+
+                // Return HTTP response based on database query result
+                if (Array.isArray(queryResult) || typeof queryResult === 'object') {
+                    return getResponse(200, res, queryResult)
+                } else {
+                    // pass queryResult directly to getResponse 
+                    // since queryResult is probably a statusCode at this point
+                    return getResponse(queryResult, res)
+                }
             }
         })
     }
 
     // Interact with model based on HTTP request type
     async #queryDB(requestType, req, model, options) {
+        const endpoint = this.#getEndpoint(req)
+
         switch (requestType) {
             case 'get':
-                const newOptions = options
-    
-                if (req.params.id) {
-                    newOptions.type = 'one'
-                    newOptions.id = options.data.id
-
-                    return await modelHelper.get(model, newOptions)
-                } else {
-                    return await modelHelper.get(model, {type: 'all'})
-                }
+                return await modelHelper.find(model, options)       
                 break;
-
-            case 'POST':
-                break;
-                
-            default:
-                break;
-        }
-    }
-
-    // Return HTTP response object based on HTTP status code
-    #getResponse(status, res, modelResponse) {
-        switch (status) {
-            case 400:
-                return res.status(status).json({
-                    status,
-                    message: 'bad request'
-                })
-                break
-    
-            case 401:
-                return res.status(status).json({
-                    status,
-                    message: 'unauthorized'
-                })
-                break
         
-            case 404:
-                return res.status(status).json({
-                    status,
-                    message: 'resource not found'
-                })
-                break
-    
-            case 500:
-                return res.status(status).json({
-                    status,
-                    message: 'internal server error'
-                })
-                break
-    
-            case 200:
-                if (Array.isArray(modelResponse) || typeof modelResponse === 'object') {
-                    return res.status(status).json({
-                        status,
-                        message: 'ok',
-                        data: modelResponse
-                    })
-                } else {
-                    return res.status(status).json({
-                        status,
-                        message: 'ok'
-                    })
-                }
-                break
-            case 'duplicate':
-                return res.status(400).json({
-                    status: 400,
-                    message: 'duplicate data provided'
-                })
-                break
+            case 'post':
+                return await modelHelper.create(model, options)       
+                break;
+
+            case 'patch':
+                return await modelHelper.update(model, options)       
+                break;
+
+            case 'delete':
+                return await modelHelper.remove(model, options)       
+                break;
+        
             default:
                 break;
         }
     }
 
     // Determine model to use 
-    #getModel(req) {
-        const endpoint = (() => {
-            const urlString = req.baseUrl
-            const urlPaths = urlString.split('/')
-            return urlPaths[3].charAt(0).toUpperCase() + urlPaths[3].slice(1)
-        })()
+    #getSchema(endpoint) {
+        const schema = this.schemas[endpoint]
 
-        const model = this.models[endpoint]
-
-        if (model) {
-            return model
+        if (schema) {
+            return schema
         } else {
-            throw new Error(`${endpoint} model seems to exist but was not added to the Router class.`)
+            return false
         }
+    }
+
+    // Get endpoint from req object
+    #getEndpoint(req) {
+        const urlString = req.baseUrl
+        const urlPaths = urlString.split('/')
+        
+        return urlPaths[3].toLowerCase()
+    }
+
+    // Merge two objects into one and return the new object
+    // Todo: refactor
+    #mergeObjects(objectOne, objectTwo) {
+        const object1 = (objectOne) ? objectOne : {}
+        const object2 = (objectTwo) ? objectTwo : {}
+        
+        const newObject = {}
+
+        Object.keys(object1).forEach((key) => {
+            newObject[key] = object1[key]
+        })
+
+        Object.keys(object2).forEach((key) => {
+            newObject[key] = object2[key]
+        })
+
+        return newObject
     }
 }

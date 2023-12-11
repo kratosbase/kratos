@@ -1,18 +1,26 @@
 import express from 'express'
 import Router from './Router.js'
+import Model from './Model.js'
+import getResponse from '../helpers/responseHelper.js'
 import mongoose from "mongoose"
 import cors from 'cors'
 import helmet from 'helmet'
 import index from '../routes/index.js'
+import auth from './../middlewares/auth.js'
+import packageJson from './../package.json' assert { type: "json" }
 
 /**
  * Kratos class
  */
 export default class Kratos {
-    app = express()
+    #app = express()
+    #consoleColor = '\x1b[36m%s\x1b[0m'
+
     #localConfig = {
         port: this.#generatePort(),
-        version: 1
+        api_version: 1,
+        cors_origins: ['localhost'],
+        version: packageJson.version
     }
 
     constructor(config) {
@@ -23,41 +31,87 @@ export default class Kratos {
          */
         this.config = config
         this.port = parseInt(this.config.port)
-        this.version = (this.config.version) ? this.#getMajorVersion(this.config.version) : this.#localConfig.version
-        this.baseURL = `/api/v${this.version}`
+        this.api_version = (this.config.version) ? this.#getMajorVersion(this.config.version) : this.#localConfig.api_version
+        this.baseURL = `/api/v${this.api_version}`
         this.db_server = this.config.db_server
-        this.app
+        this.disable_auth = (this.config.disable_auth) ? this.config.disable_auth : false
+        this.version = 'Kratos version: ' + this.#localConfig.version
+        this.maintenance = (this.config.maintenance) ? this.config.maintenance : false
     }
 
     /**
      * Serve the Kratos application
      *
-     * @param {Object} routes Routes object
+     * @param {Object} defaultRouter Default router object
+     * @param {Object} customRouter Custom router object (optional)
      */
-    launch(routes) {
+    launch(defaultRouter, customRouter) {
         // Initialize middlewares
-        this.#initMiddlewares(this.app)
+        this.#initMiddlewares(this.#app)
 
         // Initialize config
-        this.#initConfig(this.app)
+        this.#initConfig(this.#app)
 
-        // Initialize routes
-        this.#initRoutes(this.app, routes)
+        // Initialize routers
+        this.#initRoutes(this.#app, defaultRouter, customRouter)
 
         // Initialize DB
-        this.#initDB(this.app)
+        this.#initDB(this.#app)
         .then(() => {
-            this.app.listen(this.port, () => console.log(`Kratos app is running on port: ${this.port}`))
+            this.#app.listen(this.port, () => console.log(`Kratos app is running on port: ${this.port}`))
         })
     }
 
     /**
-     * Router class
+     * Return JSON HTTP Response
      *
-     * @param {Object} models Models object
+     * @param {Number} statusCode Status code
+     * @param {Response} res Resource response object
+     * @param {Object} data Data object to respond with in case of successful response
      */
-    router(models) {
-        return new Router(models)
+    respond(statusCode, res, data) {
+        return getResponse(statusCode, res, data)
+    }
+
+    /**
+     * Initialize new Router
+     *
+     * @param {Object} schemas Schemas object
+     */
+    router(schemas) {
+        return new Router(schemas)
+    }
+
+    /**
+     * Initialize new Model
+     *
+     * @param {String} name Model name
+     * @param {Object} schema Schema object
+     * @param {Request} req Resource request
+     */
+    model(name, schema, req) {
+        return new Model(name, schema, req)
+    }
+
+    /**
+     * Wrapper for express.Router()
+     *
+     * @param {Object} options Router options
+     */
+    expressRouter(options) {
+        return express.Router(options)
+    }
+
+    /**
+     * Return current endpoint from request (refactoring soon)
+     * 
+     * @param {Object} req Request object
+     */
+    getEndpoint(req) {
+        const urlString = req.baseUrl
+        const urlPaths = urlString.split('/')
+        
+        return urlPaths[4].toLowerCase()
     }
 
     // Generates port for server to listen on
@@ -73,17 +127,27 @@ export default class Kratos {
     }
 
     // Initialize routes
-    #initRoutes(app, routes) {
-        console.log('Initializing routes...')
+    #initRoutes(app, defaultRouter, customRouter) {
+        console.log(this.#consoleColor, 'Initializing routes...')
 
+        // Index route
         app.use(`${this.baseURL}/`, index)
-        app.use(`${this.baseURL}/:resource`, routes)
+        
+        // Custom routes
+        app.use(`${this.baseURL}/custom`, (customRouter) ? customRouter : (req, res) => {
+            return this.respond(404, res)
+        })
+
+        // Default routes
+        app.use(`${this.baseURL}/:resource`, defaultRouter)
     }
 
     // Initialize middlewares
     #initMiddlewares(app) {
+        console.log(this.#consoleColor, 'Initializing middlewares...')
+
         app.use(cors({
-            origin: process.env.CORS_ORIGINS,
+            origin: (this.config.cors_origins) ? this.config.cors_origins : this.#localConfig.cors_origins,
             optionsSuccessStatus: 200 
         }))
     
@@ -96,11 +160,25 @@ export default class Kratos {
                 xDownloadOptions: false,
             })
         )
+
+        // Report downtime if maintenance mode is turned on
+        app.use((req, res, next) => {
+            if (this.maintenance) {
+                return getResponse(503, res)
+            } else {
+                next()
+            }
+        })
+        
+        // Decide which authentication middleware to use
+        if (!this.disable_auth) {
+            app.use(auth)
+        }
     }
 
     // Initialize database
-    async #initDB(app) {
-        console.log('Initializing database...')
+    async #initDB() {
+        console.log(this.#consoleColor, 'Initializing database connection...')
 
         return await mongoose
             .connect(this.db_server)
@@ -114,6 +192,8 @@ export default class Kratos {
 
     // Initialize config
     #initConfig(app) {
+        console.log(this.#consoleColor, 'Initializing config...')
+
         app.keepAliveTimeout = (this.config.keepAliveTimeout) ? this.config.keepAliveTimeout : 120 * 1000
         app.headersTimeout = (this.config.headersTimeout) ? this.config.headersTimeout : 120 * 1000
     }

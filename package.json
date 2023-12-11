@@ -1,7 +1,7 @@
 {
   "name": "kratos",
-  "version": "1",
-  "description": "Kratos is an opinionated framework that uses Express under the hood for building API backends as fast as possible.",
+  "version": "1.0.0",
+  "description": "Kratos is an opinionated framework that uses Express under the hood to serve API backends as fast as possible.",
   "type": "module",
   "main": "index.js",
   "keywords": ["express", "framework", "api", "mongodb"],
