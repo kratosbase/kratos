@@ -93,7 +93,66 @@ This project is being actively developed using [Stack Overflow's API design best
 
 ## Documentation
 
-WIP
+### Base class initialization
+#### example:
+```js
+const app = new Kratos({
+    port: 9001,
+    db_server: dbServer
+})
+```
+
+#### This class accepts a `config` object with the following properties:
+| Property | Type |Description           | Default
+| :-------- | :------- | :------------------------- | ---- |
+| `port` | `int` | Port to serve application on | Random
+| `api_version` | `int` | Major app release version | 1
+| `cors_origins` | `mixed` | Origins allowed to access api | ['localhost']
+| `db_server` | `string` | MongoDB connection string | ***required***
+| `disable_auth` | `boolean` | Whether to disable in-built auth or not | false
+| `maintenance` | `boolean` | Set maintenance mode | false
+
+### Router class initialization
+#### example:
+```js
+const defaultRouter = app.router({
+    users: User, 
+}).getRoutes()
+```
+
+#### This class accepts a `schemas` object with the following properties:
+| Properties | Type |Description           | Default
+| :-------- | :------- | :------------------------- | ---- |
+| `[dynamic value]` | `object` | schema object | ***required***
+
+**note: Whatever name you give your schema object property is the same name that will be used as the resource endpoint. So according to `defaultRouter` in the example above. The `User` schema object will be consumable via `[host]:[port]/api/v[version-number]/users`.
+
+
+### Custom routing
+In a scenario when you want to interact with the database in a special way, like deleting multiple documents when a user requests to delete their account... you can make use of custom routing.
+
+Custom resources are served at
+```http
+/api/v{version-number}/custom/:resource
+```
+#### Custom router example
+
+```js
+const customRouter = app.expressRouter()
+
+customRouter.get('/delete-account', async (req, res) => {
+    // Initialize a mongoose model
+    const user = app.model('User', Bank, req).model
+
+    const post = app.model('Post', Bank, req).model
+
+    // delete user and user's posts
+    ***
+
+    // Return JSON response
+    return app.respond(200, res)
+})
+```
 
 
 ## Philosophy
