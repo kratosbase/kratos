@@ -73,6 +73,7 @@ This project is being actively developed using [Stack Overflow's API design best
 - Focus on high performance and scalability
 - Auto-routing
 - Custom routing
+- Data validation with [Joi](https://github.com/hapijs/joi)
 - Auto-query database (for auto-routing)
 - API versioning
 - HTTP response handler
