@@ -101,7 +101,8 @@ As an indie hacker, I didn't want to repeatedly write queries and routing + want
 Kratos is built on top of the framework everyone loves... specifically for building APIs that meet the highest design standard. No compromise.
 
 
-## Contributing
+## Contributing ## Contributing [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwyl/esta/issues)
+
 
 Constructive contributions are always welcome!
 
