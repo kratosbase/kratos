@@ -1,19 +1,20 @@
 {
-  "name": "@lkcoder/kratos",
-  "version": "1.0.0",
-  "description": "Build super-fast RESTful APIs in minutes... not days!",
+  "name": "@kratosbase/kratos",
+  "version": "0.6.0",
+  "description": "Build super-fast & scalable RESTful APIs in minutes.",
   "type": "module",
   "main": "index.js",
   "keywords": [
     "express",
     "framework",
     "api",
-    "mongodb"
+    "rest",
+    "nodejs"
   ],
   "author": "Olalekan Omoniyi",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lkgit1/kratos.git"
+    "url": "git+https://github.com/kratosbase/kratos.git"
   },
   "dependencies": {
     "config": "3.3.9",
