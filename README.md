@@ -65,9 +65,10 @@ const defaultRouter = app.router({
 
 app.launch(defaultRouter)
 ```
-Now fire up your browser/postman and make a POST/GET/PATCH/DELETE request to localhost:9000/api/v1/users and you should get a response.
+Now run `node index.js` and fire up your browser/postman and make a request (POST/GET/PATCH/DELETE) request to `localhost:9000/api/v1/users` and you should get a response.
 
 Depending on the request type, validation rules will be applied to match the rules in the schema file.
+
 ## Features
 This project is being actively developed using [Stack Overflow's API design best practices](https://stackoverflow.blog/2020/03/02/best-practices-for-rest-api-design/)
 - Focus on high performance and scalability
