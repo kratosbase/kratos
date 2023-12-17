@@ -13,18 +13,18 @@ export default class Router {
     /**
      * Initialize a new Router instance
      *
-     * @param {Object} schemas Schemas object
+     * @param {Object} resources resources object
      */
-    constructor(schemas) {
-        this.schemas = schemas
+    constructor(resources) {
+        this.resources = resources
 
-        Object.keys(this.schemas).forEach(key => {
-            this.schemas[key].model = mongoose.model(key, new mongoose.Schema(this.schemas[key].schema))
+        Object.keys(this.resources).forEach(key => {
+            this.resources[key].model = mongoose.model(key, new mongoose.Schema(this.resources[key].schema))
         })
     }
 
     /**
-     * Create different HTTP endpoints based on provided schema objects
+     * Create different HTTP endpoints based on provided resource objects
      *
      * @return {Object} returns router object
      */
@@ -54,34 +54,34 @@ export default class Router {
             // Log the request
             console.log(`${type} /${endpoint.toLowerCase()}${(req.params.id) ? '/' + req.params.id : ''}`)
             
-            // Schema Object
-            const schemaObj = this.#getSchema(endpoint)
+            // resource Object
+            const resourceObj = this.#getresource(endpoint)
 
-            if (!schemaObj.schema) {
+            if (!resourceObj.schema) {
                 return getResponse(404, res)
             }
 
             // Validation rules
-            const schemaValidationRules = schemaObj.validationRules[type]
+            const resourceValidationRules = resourceObj.validationRules[type]
             const localValidationRules = (param && param == '/:id') ? {
                 id: Joi.string().trim().required()
             } : {}
 
             // Merge both validation rules
-            const validationRules = this.#mergeObjects(schemaValidationRules, localValidationRules)
+            const validationRules = this.#mergeObjects(resourceValidationRules, localValidationRules)
 
             // combine the req.body and req.params payloads into one
             const payload = this.#mergeObjects(req.body, req.params)
 
             // Validate the payload based on the resource validation rules
-            const schema = Joi.object(validationRules).validate(payload)
+            const joiSchema = Joi.object(validationRules).validate(payload)
         
-            const { error, value } = schema
+            const { error, value } = joiSchema
 
             if (error) {
                 return res.status(400).send({ status: 400, message: error.details[0].message })
             } else {
-                const queryResult = await this.#queryDB(type, req, schemaObj.model, {
+                const queryResult = await this.#queryDB(type, req, resourceObj.model, {
                     id: (value.id) ? value.id : undefined,
                     type: (param == '/:id') ? 'one' : 'all',
                     data: value
@@ -126,11 +126,11 @@ export default class Router {
     }
 
     // Determine model to use 
-    #getSchema(endpoint) {
-        const schema = this.schemas[endpoint]
+    #getresource(endpoint) {
+        const resource = this.resources[endpoint]
 
-        if (schema) {
-            return schema
+        if (resource) {
+            return resource
         } else {
             return false
         }

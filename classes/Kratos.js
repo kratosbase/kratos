@@ -76,21 +76,21 @@ export default class Kratos {
     /**
      * Initialize new Router
      *
-     * @param {Object} schemas Schemas object
+     * @param {Object} resources resources object
      */
-    router(schemas) {
-        return new Router(schemas)
+    router(resources) {
+        return new Router(resources)
     }
 
     /**
      * Initialize new Model
      *
      * @param {String} name Model name
-     * @param {Object} schema Schema object
+     * @param {Object} resource Resource object
      * @param {Request} req Resource request
      */
-    model(name, schema, req) {
-        return new Model(name, schema, req)
+    model(name, resource, req) {
+        return new Model(name, resource, req)
     }
 
     /**
