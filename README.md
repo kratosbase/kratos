@@ -98,7 +98,8 @@ This project is being actively developed using [Stack Overflow's API design best
 ```js
 const app = new Kratos({
     port: 9001,
-    db_server: dbServer
+    db_server: dbServer,
+    cors_origins: ['http://localhost:3000'] // URLs allowed to make requests to this API
 })
 ```
 
