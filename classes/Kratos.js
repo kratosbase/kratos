@@ -19,7 +19,6 @@ export default class Kratos {
     #localConfig = {
         port: this.#generatePort(),
         api_version: 1,
-        cors_origins: ['localhost'],
         version: packageJson.version
     }
 
@@ -37,6 +36,7 @@ export default class Kratos {
         this.disable_auth = (this.config.disable_auth) ? this.config.disable_auth : false
         this.version = 'Kratos version: ' + this.#localConfig.version
         this.maintenance = (this.config.maintenance) ? this.config.maintenance : false
+        this.cors_origins = (this.config.cors_origins) ? this.config.cors_origins : []
     }
 
     /**
@@ -147,7 +147,7 @@ export default class Kratos {
         console.log(this.#consoleColor, 'Initializing middlewares...')
 
         app.use(cors({
-            origin: (this.config.cors_origins) ? this.config.cors_origins : this.#localConfig.cors_origins,
+            origin: this.cors_origins,
             optionsSuccessStatus: 200 
         }))
     
