@@ -16,11 +16,11 @@ To install run:
 npm i @kratosbase/kratos
 ```
 
-To spin up an application, first you need to create a schema file.
+To spin up an application, first you need to create a resource file.
 
-Assuming you want to create an API containing a user resource. Your schema file should look like this:
+Assuming you want to create an API containing a user resource. Your file should look like this:
 ```js
-// schemas/User.js
+// resources/User.js
 import { Joi } from 'kratos'
 
 const commonRules = {
@@ -50,7 +50,7 @@ export default User
 Now in your `index.js` file:
 ```js
 import Kratos from 'Kratos'
-import User from './schemas/User.js'
+import User from './resources/User.js'
 
 const dbServer = 'YOUR-DB-SERVER'
 
@@ -79,7 +79,7 @@ This project is being actively developed using [Stack Overflow's API design best
 - API versioning
 - HTTP response handler
 - CORS
-
+- Authentication
 
 ## Roadmap
 
@@ -111,6 +111,7 @@ const app = new Kratos({
 | `cors_origins` | `mixed` | Origins allowed to access api | ['localhost']
 | `db_server` | `string` | MongoDB connection string | ***required***
 | `disable_auth` | `boolean` | Whether to disable in-built auth or not | false
+| `show_token` | `boolean` | Determines whether to enable /get-token route | false
 | `maintenance` | `boolean` | Set maintenance mode | false
 
 ### Router class initialization
@@ -152,6 +153,24 @@ customRouter.get('/delete-account', async (req, res) => {
 
     // Return JSON response
     return app.respond(200, res)
+})
+```
+
+### Authentication
+To enable authentication you have to set `disable_auth: false` or remove it completely from your config object to use the default, which is also false.
+
+You also have to set `show_token: true` in your config object to enable `/get-token` endpoint. This allows you to be able to access the endpoint and copy your token for use in client.
+
+* To generate `admin` tokens, visit `/get-token?admin=true`
+* For security reasons... after copying your token, it is recommended that you remove `show_token: true` from your config object to hide the token endpoint.
+
+#### Authentication config example
+
+```js
+const app = new Kratos({
+    ...
+    disable_auth: false // not compulsory to set this
+    show_token: true
 })
 ```
 
