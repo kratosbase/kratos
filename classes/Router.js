@@ -58,15 +58,23 @@ export default class Router {
             // resource Object
             const resourceObj = this.#getresource(endpoint)
 
-            // determine roles based on param value
-            const roles = (param == '/:id' || param == '/count') ? resourceObj.validationRules[type].single_roles : resourceObj.validationRules[type].roles
+            if (!resourceObj || !resourceObj.schema) {
+                return getResponse(404, res)
+            }
 
-            if (!resourceObj.schema || !this.#userHasRole(req.userRole, roles)) {
+            // validation rules
+            const allValidationRules = (resourceObj.validationRules) ? resourceObj.validationRules : {}
+            const requestValidationRules = (allValidationRules[type]) ? allValidationRules[type] : {}
+
+            // determine roles based on param value
+            const roles = (param == '/:id' || param == '/count') ? requestValidationRules.single_roles : requestValidationRules.roles
+
+            if (!this.#userHasRole(req.userRole, roles)) {
                 return getResponse(404, res)
             }
 
             // Validation rules
-            const resourceValidationRules = resourceObj.validationRules[type].rules
+            const resourceValidationRules = requestValidationRules.rules
             const localValidationRules = (param && param == '/:id') ? {
                 id: Joi.string().trim().required()
             } : {}
