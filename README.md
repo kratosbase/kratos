@@ -161,7 +161,7 @@ To enable authentication you have to set `disable_auth: false` or remove it comp
 
 You also have to set `show_token: true` in your config object to enable `/get-token` endpoint. This allows you to be able to access the endpoint and copy your token for use in client.
 
-* To generate `admin` tokens, visit `/get-token?admin=true`
+* To generate non-default role tokens, visit `/get-token?role={role}`... where `{role}` is the name of the role the token is being generated for.
 * For security reasons... after copying your token, it is recommended that you remove `show_token: true` from your config object to hide the token endpoint.
 
 #### Authentication config example
@@ -174,6 +174,19 @@ const app = new Kratos({
 })
 ```
 
+#### Restricting access to certain roles
+You can restrict access to your endpoints and allow only certain roles to access them by updating your resource object `validationRules` to look like this:
+```js
+const User = {
+    ...
+    validationRules: {
+        get: {
+            single_roles: ['user', 'admin'], // Restrict GET access to /users/:id
+            roles: ['admin'] // restrict GET access to /users
+        }
+    }
+}
+```
 
 ## Philosophy
 As an indie hacker, I didn't want to repeatedly write queries and routing + wanted something I could spin up quickly for any project (scalable and minimalistic) while I focus mostly on the frontend. The other frameworks I found were either too robust or had bad design patterns... that's how I ended up building this.
