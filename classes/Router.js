@@ -57,12 +57,15 @@ export default class Router {
             // resource Object
             const resourceObj = this.#getresource(endpoint)
 
-            if (!resourceObj.schema) {
+            // determine roles based on param value
+            const roles = (param == '/:id') ? resourceObj.validationRules[type].single_roles : resourceObj.validationRules[type].roles
+
+            if (!resourceObj.schema || !this.#userHasRole(req.userRole, roles)) {
                 return getResponse(404, res)
             }
 
             // Validation rules
-            const resourceValidationRules = resourceObj.validationRules[type]
+            const resourceValidationRules = resourceObj.validationRules[type].rules
             const localValidationRules = (param && param == '/:id') ? {
                 id: Joi.string().trim().required()
             } : {}
@@ -161,5 +164,15 @@ export default class Router {
         })
 
         return newObject
+    }
+
+    // Check if user has required role to access resource
+    #userHasRole(role, roles) {
+        // Allow role if roles is undefined AKA anybody can access resource
+        if (roles === undefined) {
+            return true
+        } else {
+            return roles.includes(role)
+        }
     }
 }

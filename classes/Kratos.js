@@ -6,6 +6,7 @@ import mongoose from "mongoose"
 import cors from 'cors'
 import helmet from 'helmet'
 import index from '../routes/index.js'
+import token from '../routes/token.js'
 import auth from './../middlewares/auth.js'
 import packageJson from './../package.json' assert { type: "json" }
 
@@ -37,6 +38,7 @@ export default class Kratos {
         this.version = 'Kratos version: ' + this.#localConfig.version
         this.maintenance = (this.config.maintenance) ? this.config.maintenance : false
         this.cors_origins = (this.config.cors_origins) ? this.config.cors_origins : []
+        this.show_token = (this.config.show_token) ? this.config.show_token : false
     }
 
     /**
@@ -133,6 +135,11 @@ export default class Kratos {
         // Index route
         app.use(`${this.baseURL}/`, index)
         
+        // JWT route
+        app.use(`${this.baseURL}/get-token`, (this.show_token) ? token : (req, res) => {
+            return this.respond(404, res)
+        })
+
         // Custom routes
         app.use(`${this.baseURL}/custom`, (customRouter) ? customRouter : (req, res) => {
             return this.respond(404, res)
