@@ -34,6 +34,7 @@ export default class Router {
 
         // Read
         this.#getRoute('/', 'get')
+        this.#getRoute('/count', 'get')
         this.#getRoute('/:id', 'get')
 
         // Update
@@ -48,17 +49,17 @@ export default class Router {
     // Return routing logic based on router param and HTTP request type
     #getRoute(param, type) {
         return this.#router[type](param, async (req, res) => {
-            // URL endpoint
-            const endpoint = this.#getEndpoint(req)
+            // grab the base endpoint
+            const endpoint = this.#getBaseEndpoint(req)
 
             // Log the request
-            console.log(`${type} /${endpoint.toLowerCase()}${(req.params.id) ? '/' + req.params.id : ''}`)
+            console.log(`${type} /${this.#getEndpoint(req)}${(req.params.id) ? '/' + req.params.id : ''}`)
             
             // resource Object
             const resourceObj = this.#getresource(endpoint)
 
             // determine roles based on param value
-            const roles = (param == '/:id') ? resourceObj.validationRules[type].single_roles : resourceObj.validationRules[type].roles
+            const roles = (param == '/:id' || param == '/count') ? resourceObj.validationRules[type].single_roles : resourceObj.validationRules[type].roles
 
             if (!resourceObj.schema || !this.#userHasRole(req.userRole, roles)) {
                 return getResponse(404, res)
@@ -86,7 +87,7 @@ export default class Router {
             } else {
                 const queryResult = await this.#queryDB(type, req, resourceObj.model, {
                     id: (value.id) ? value.id : undefined,
-                    type: (param == '/:id') ? 'one' : 'all',
+                    type: (param == '/:id') ? 'one' :  (param == '/count') ? 'count' : 'all',
                     data: value
                 })
 
@@ -139,12 +140,21 @@ export default class Router {
         }
     }
 
+    // Get base endpoint e.g /api/v1/[base_endpoint] <- we're grabbing that
+    #getBaseEndpoint(req) {
+        const urlString = req.baseUrl
+        const urlPaths = urlString.split('/')
+
+        return urlPaths[3].toLowerCase()
+    }
+
     // Get endpoint from req object
     #getEndpoint(req) {
         const urlString = req.baseUrl
+        const endpoint = req.path
         const urlPaths = urlString.split('/')
-        
-        return urlPaths[3].toLowerCase()
+
+        return urlPaths[3].toLowerCase() + endpoint.toLowerCase()
     }
 
     // Merge two objects into one and return the new object
