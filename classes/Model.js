@@ -4,17 +4,13 @@ import mongoose from "mongoose"
  * Model class
  */
 export default class Model {
-    constructor(name, schemaObj, req) {
+    constructor(name, resource) {
         /**
-         * Initialize new Model instance
+         * Initialize new Model instance (mongoose wrapper)
          *
          * @param {String} name Model name
-         * @param {Object} schema Schema object
-         * @param {Request} req Resource request
          */
-        this.schemaObj = schemaObj
-        this.reqType = req.method.toLowerCase()
-        this.validationRules = this.schemaObj.validationRules[this.reqType]
-        this.model = mongoose.model(name, new mongoose.Schema(this.schemaObj.schema))
+        this.resource = resource
+        this.model = mongoose.model(name, new mongoose.Schema(this.resource.schema))
     }
 }

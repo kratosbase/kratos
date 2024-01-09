@@ -30,7 +30,7 @@ const commonRules = {
     last_active: Joi.date()
 }
 
-const User = {
+const user = {
     schema: {
         username: { type: String, unique: true, required: true },
         picture: { type: String },
@@ -44,30 +44,31 @@ const User = {
     }
 }
 
-export default User
+export default user
 ```
 
 Now in your `index.js` file:
 ```js
 import Kratos from 'Kratos'
-import User from './resources/User.js'
+import user from './resources/user.js'
 
-const dbServer = 'YOUR-DB-SERVER'
+const db_server = 'YOUR-DB-SERVER'
 
 const app = new Kratos({
     port: 9000,
-    db_server: dbServer
+    db_server: db_server
 })
 
 const defaultRouter = app.router({
-    users: User
+    users: user 
+    user // this could also work but routes to /user instead of /users
 }).getRoutes()
 
 app.launch(defaultRouter)
 ```
 Now run `node index.js` and fire up your browser/postman and make a request (POST/GET/PATCH/DELETE) request to `localhost:9000/api/v1/users` and you should get a response.
 
-Depending on the request type, validation rules will be applied to match the rules in the schema file.
+Depending on the request type, validation rules will be applied to match the rules in the resource file.
 
 ## Features
 This project is being actively developed using [Stack Overflow's API design best practices](https://stackoverflow.blog/2020/03/02/best-practices-for-rest-api-design/)
@@ -97,8 +98,8 @@ This project is being actively developed using [Stack Overflow's API design best
 #### example:
 ```js
 const app = new Kratos({
-    port: 9001,
-    db_server: dbServer,
+    port: 9000,
+    db_server: db_server,
     cors_origins: ['http://localhost:3000'] // URLs allowed to make requests to this API
 })
 ```
@@ -118,16 +119,16 @@ const app = new Kratos({
 #### example:
 ```js
 const defaultRouter = app.router({
-    users: User, 
+    users: user, 
 }).getRoutes()
 ```
 
-#### This class accepts a `schemas` object with the following properties:
+#### This class accepts a `resources` object with the following properties:
 | Properties | Type |Description           | Default
 | :-------- | :------- | :------------------------- | ---- |
-| `[dynamic value]` | `object` | schema object | ***required***
+| `[dynamic value]` | `object` | resource object | ***required***
 
-**note: Whatever name you give your schema object property is the same name that will be used as the resource endpoint. So according to `defaultRouter` in the example above. The `User` schema object will be consumable via `[host]:[port]/api/v[version-number]/users`.
+**note: Whatever name you give your resource object property is the same name that will be used as the resource endpoint. So according to `defaultRouter` in the example above. The `user` resource object will be consumable via `[host]:[port]/api/v[version-number]/users`.
 
 
 ### Custom routing
@@ -144,9 +145,9 @@ const customRouter = app.expressRouter()
 
 customRouter.get('/delete-account', async (req, res) => {
     // Initialize a mongoose model
-    const user = app.model('User', Bank, req).model
+    const user = app.model('User').model
 
-    const post = app.model('Post', Bank, req).model
+    const post = app.model('Post').model
 
     // delete user and user's posts
     ***
@@ -155,6 +156,7 @@ customRouter.get('/delete-account', async (req, res) => {
     return app.respond(200, res)
 })
 ```
+Do note, that `app.model()` is a mongoose wrapper for `mongoose.model`. This is so you have more control over how the queries are formed.
 
 ### Authentication
 To enable authentication you have to set `disable_auth: false` or remove it completely from your config object to use the default, which is also false.
