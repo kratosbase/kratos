@@ -70,7 +70,7 @@ export default class Router {
             const roles = (param == '/:id' || param == '/count') ? requestValidationRules.single_roles : requestValidationRules.roles
 
             if (!this.#userHasRole(req.userRole, roles)) {
-                return getResponse(404, res)
+                return getResponse(401, res)
             }
 
             // Validation rules
