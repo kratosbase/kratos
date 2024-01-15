@@ -1,6 +1,6 @@
 {
   "name": "@kratosbase/kratos",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Build super-fast & scalable RESTful APIs in minutes.",
   "type": "module",
   "main": "index.js",
