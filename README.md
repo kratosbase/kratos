@@ -207,7 +207,7 @@ Kratos is built on top of the framework everyone loves... specifically for build
 
 Constructive contributions are always welcome!
 
-See the [Contributing Guide](https://github.com/kratosbase/kratos/blob/master/Contributing.md) for ways to get started.
+See the [Contributing Guide](https://github.com/kratosbase/kratos/blob/master/CONTRIBUTING.md) for ways to get started.
 
 ### Security issues
 If you discover a security vulnerability in Kratos, please see [Security Policies and Procedures](https://github.com/kratosbase/kratos/blob/master/Security.md).
