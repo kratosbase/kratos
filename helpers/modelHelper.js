@@ -37,7 +37,7 @@ export async function find(model, options) {
                 if (response) {
                     return { 'count': response }
                 } else {
-                    return 404
+                    return { 'count': 0 }
                 }
             })
             .catch((e) => {
