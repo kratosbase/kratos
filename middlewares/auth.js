@@ -2,7 +2,7 @@ import getResponse from "../helpers/responseHelper.js"
 import validateJWT from "../helpers/validateJWT.js"
 
 export default function (req, res, next) {
-    if (endpoint(req.path) === 'get-token') {
+    if (endpoint(req.path) === 'get-token' || endpoint(req.path) === 'show-secret') {
         next()
     } else if (req.headers.authorization && req.headers.public_key) {
         // validate token and pub key

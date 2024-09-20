@@ -39,7 +39,7 @@ export default class Kratos {
         this.version = 'Kratos version: ' + this.#localConfig.version
         this.maintenance = (this.config.maintenance) ? this.config.maintenance : false
         this.cors_origins = (this.config.cors_origins) ? this.config.cors_origins : []
-        this.show_token = (this.config.show_token) ? this.config.show_token : false
+        this.show_secret = (this.config.show_secret) ? this.config.show_secret : false
         this.jwt_secret = (this.config.jwt_secret) ? this.config.jwt_secret : crypto.randomBytes(32).toString('hex')
     }
 
@@ -138,7 +138,13 @@ export default class Kratos {
         app.use(`${this.baseURL}/`, index)
         
         // JWT route
-        app.use(`${this.baseURL}/get-token`, (this.show_token) ? token : (req, res) => {
+        app.use(`${this.baseURL}/get-token`, (!this.disable_auth) ? token : (req, res) => {
+            return this.respond(404, res)
+        })
+
+        app.use(`${this.baseURL}/show-secret`, (this.show_secret) ? (req, res) => {
+            return this.respond(200, res, { jwt_secret: this.jwt_secret })
+        } : (req, res) => {
             return this.respond(404, res)
         })
 
