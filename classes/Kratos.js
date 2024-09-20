@@ -9,6 +9,7 @@ import index from '../routes/index.js'
 import token from '../routes/token.js'
 import auth from './../middlewares/auth.js'
 import packageJson from './../package.json' assert { type: "json" }
+import crypto from 'crypto'
 
 /**
  * Kratos class
@@ -39,6 +40,7 @@ export default class Kratos {
         this.maintenance = (this.config.maintenance) ? this.config.maintenance : false
         this.cors_origins = (this.config.cors_origins) ? this.config.cors_origins : []
         this.show_token = (this.config.show_token) ? this.config.show_token : false
+        this.jwt_secret = (this.config.jwt_secret) ? this.config.jwt_secret : crypto.randomBytes(32).toString('hex')
     }
 
     /**
@@ -167,6 +169,13 @@ export default class Kratos {
                 xDownloadOptions: false,
             })
         )
+
+        // Set jwt secret key in req object
+        app.use((req, res, next) => {
+            req.jwt_secret = this.jwt_secret
+
+            next()
+        })
 
         // Report downtime if maintenance mode is turned on
         app.use((req, res, next) => {

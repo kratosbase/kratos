@@ -21,7 +21,7 @@ To spin up an application, first you need to create a resource file.
 Assuming you want to create an API containing a user resource. Your file should look like this:
 ```js
 // resources/User.js
-import { Joi } from 'kratos'
+import { Joi } from '@kratosbase/kratos'
 
 const commonRules = {
     username: Joi.string().trim().max(15).required(),
@@ -49,7 +49,7 @@ export default user
 
 Now in your `index.js` file:
 ```js
-import Kratos from 'Kratos'
+import Kratos from '@kratosbase/kratos'
 import user from './resources/user.js'
 
 const db_server = 'YOUR-DB-SERVER'
@@ -85,7 +85,7 @@ This project is being actively developed using [Stack Overflow's API design best
 ## Roadmap
 
 - Multiple database support (Planned)
-- Authentication (WIP)
+- Authentication (✅)
 - Custom middlewares (Planned)
 - Filtering (Planned)
 - Sorting (Planned)
@@ -161,7 +161,9 @@ Do note, that `app.model()` is a mongoose wrapper for `mongoose.model`. This is 
 ### Authentication
 To enable authentication you have to set `disable_auth: false` or remove it completely from your config object to use the default, which is also false.
 
-You also have to set `show_token: true` in your config object to enable `/get-token` endpoint. This allows you to be able to access the endpoint and copy your token for use in client.
+You also have to set `show_token: true` in your config object to enable `/get-token` GET endpoint. This allows you to be able to generate tokens for use in your application.
+
+The `id` query parameter is required when making a request to `/get-token`. Your request should look like this: `/get-token?id=[userID]`. This design is intentional, so that you can identify token owner in your application.
 
 * To generate non-default role tokens, visit `/get-token?role={role}`... where `{role}` is the name of the role the token is being generated for.
 * For security reasons... after copying your token, it is recommended that you remove `show_token: true` from your config object to hide the token endpoint.

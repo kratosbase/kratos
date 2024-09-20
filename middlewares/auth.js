@@ -7,8 +7,9 @@ export default function (req, res, next) {
     } else if (req.headers.authorization && req.headers.public_key) {
         // validate token and pub key
         const token = req.headers.authorization
-        const pub_key = req.headers.public_key
-        const payload = validateJWT(token, pub_key)
+        const secret = req.jwt_secret
+        console.log(secret)
+        const payload = validateJWT(token, secret)
 
         if (payload) {
             req.userRole = payload.role
