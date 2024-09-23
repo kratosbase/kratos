@@ -4,15 +4,16 @@ import validateJWT from "../helpers/validateJWT.js"
 export default function (req, res, next) {
     if (endpoint(req.path) === 'get-token' || endpoint(req.path) === 'show-secret') {
         next()
-    } else if (req.headers.authorization && req.headers.public_key) {
+    } else if (req.headers.authorization) {
         // validate token and pub key
         const token = req.headers.authorization
         const secret = req.jwt_secret
-        console.log(secret)
+
         const payload = validateJWT(token, secret)
 
         if (payload) {
-            req.userRole = payload.role
+            req.userRole = (payload.role) ? payload.role : 'default'
+            
             next()
         } else {
             return getResponse(401, res)
