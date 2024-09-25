@@ -5,7 +5,7 @@ export default function (req, res, next) {
     if (endpoint(req.path) === 'get-token' || endpoint(req.path) === 'show-secret') {
         next()
     } else if (req.headers.authorization) {
-        // validate token and pub key
+        // validate token
         const token = req.headers.authorization
         const secret = req.jwt_secret
 

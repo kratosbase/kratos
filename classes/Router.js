@@ -82,8 +82,8 @@ export default class Router {
             // Merge both validation rules
             const validationRules = this.#mergeObjects(resourceValidationRules, localValidationRules)
 
-            // combine the req.body and req.params payloads into one
-            const payload = this.#mergeObjects(req.body, req.params)
+            // combine the req.body and req.query payloads into one
+            const payload = this.#mergeObjects(req.body, req.query)
 
             // Validate the payload based on the resource validation rules
             const joiSchema = Joi.object(validationRules).validate(payload)
@@ -95,7 +95,7 @@ export default class Router {
             } else {
                 const queryResult = await this.#queryDB(type, req, resourceObj.model, {
                     id: (value.id) ? value.id : undefined,
-                    type: (param == '/:id') ? 'one' :  (param == '/count') ? 'count' : 'all',
+                    type: (param == '/:id' || Object.keys(value).length !== 0) ? 'one' :  (param == '/count') ? 'count' : 'all',
                     data: value
                 })
 

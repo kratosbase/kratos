@@ -17,6 +17,20 @@ export async function find(model, options) {
 
                 return 500
             })
+    } else if (options.type == 'one' && !validID) {
+        return await model.findOne(options.data)
+            .then((response) => {
+                if (response) {
+                    return response
+                } else {
+                    return 404
+                }
+            })
+            .catch((e) => {
+                //console.log(e)
+
+                return 500
+            })
     } else if (options.type == 'all') {
         return await model.find()
             .then((response) => {
