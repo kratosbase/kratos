@@ -2,7 +2,7 @@ import getResponse from "../helpers/responseHelper.js"
 import validateJWT from "../helpers/validateJWT.js"
 
 export default function (req, res, next) {
-    if (endpoint(req.path) === 'get-token' || endpoint(req.path) === 'show-secret') {
+    if (endpoint(req.path) === 'get-token' || endpoint(req.path) === 'show-secret' || path_in_paths('/' + endpoint(req.path), req.unprotected_routes)) {
         next()
     } else if (req.headers.authorization) {
         // validate token
@@ -25,5 +25,14 @@ export default function (req, res, next) {
 
 function endpoint(path) {
     const pathArray = path.split('/')
-    return pathArray[3]
+
+    const startIndex = 3
+    const slicedArray = pathArray.slice(startIndex)
+
+    // Join the array values into a single string
+    return slicedArray.join('/')
+}
+
+function path_in_paths(path, paths) {
+    return paths.find(route => route == path)
 }

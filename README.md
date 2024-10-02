@@ -115,6 +115,7 @@ const app = new Kratos({
 | `show_secret` | `boolean` | Determines whether to enable `/show-secret` `GET` endpoint | false
 | `jwt_secret` | `string` |  Set custom JWT secret | random string
 | `maintenance` | `boolean` | Set maintenance mode | false
+| `unprotected_routes` | `array` | Set list of routes to bypass auth | []
 
 ### Router class initialization
 #### example:
@@ -172,6 +173,15 @@ If you would like to use your own custom jwt secret, then you must set `jwt_secr
 
 * To generate non-default role tokens, visit `/get-token?role={role}`... where `{role}` is the name of the role the token is being generated for.
 * For security reasons... after copying your token, it is recommended that you remove `show_token: true` from your config object to hide the token endpoint.
+
+* To by-pass authentication for certain routes, add `unprotected_routes` to config like this:
+```js
+const app = new Kratos({
+  port: ...,
+  db_server: '...',
+  unprotected_routes: ['/custom/send-code', '/appointments']
+})
+```
 
 #### Authentication config example
 

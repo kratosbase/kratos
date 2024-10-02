@@ -41,6 +41,7 @@ export default class Kratos {
         this.cors_origins = (this.config.cors_origins) ? this.config.cors_origins : []
         this.show_secret = (this.config.show_secret) ? this.config.show_secret : false
         this.jwt_secret = (this.config.jwt_secret) ? this.config.jwt_secret : crypto.randomBytes(32).toString('hex')
+        this.unprotected_routes = (this.config.unprotected_routes) ? this.config.unprotected_routes : []
     }
 
     /**
@@ -163,7 +164,7 @@ export default class Kratos {
 
         app.use(cors({
             origin: this.cors_origins,
-            optionsSuccessStatus: 200 
+            optionsSuccessStatus: 200
         }))
     
         app.use(express.json({ limit: '2mb' }))
@@ -176,9 +177,11 @@ export default class Kratos {
             })
         )
 
-        // Set jwt secret key in req object
+        // Set necessary config items in req object
         app.use((req, res, next) => {
             req.jwt_secret = this.jwt_secret
+            req.baseUrl = this.baseURL
+            req.unprotected_routes = this.unprotected_routes
 
             next()
         })
