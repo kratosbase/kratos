@@ -9,3 +9,7 @@ export default function validateJWT(token, secret_key) {
         }
     })
 }
+
+export function generateJWT(id, role, secret) {
+    return jwt.sign({ role, id }, secret)
+}

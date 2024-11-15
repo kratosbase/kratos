@@ -71,7 +71,7 @@ export async function create(model, options) {
         return await model.create(options.data)
             .then((response) => {
                 if (response) {
-                    return 200
+                    return response
                 } else {
                     return 400
                 }
