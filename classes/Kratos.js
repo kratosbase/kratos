@@ -8,7 +8,11 @@ import helmet from 'helmet'
 import index from '../routes/index.js'
 import token from '../routes/token.js'
 import auth from './../middlewares/auth.js'
-import packageJson from './../package.json' assert { type: "json" }
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
+const packageJson = require('./../package.json')
+
 import crypto from 'crypto'
 
 /**
