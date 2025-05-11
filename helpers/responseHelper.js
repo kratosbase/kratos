@@ -1,6 +1,6 @@
 // Return HTTP response object based on HTTP status code
 
-export default function getResponse(status, res, data) {
+export default function getResponse(status, res, data, type=null) {
     switch (status) {
         case 200:
             if (Array.isArray(data) || typeof data === 'object') {

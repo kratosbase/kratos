@@ -101,7 +101,11 @@ export default class Router {
 
                 // Return HTTP response based on database query result
                 if (Array.isArray(queryResult) || typeof queryResult === 'object') {
-                    return getResponse(200, res, queryResult)
+                    if (typeof queryResult === 'object' && queryResult.status) {
+                        return res.status(queryResult.status).json(queryResult)
+                    } else {
+                        return getResponse(200, res, queryResult)
+                    }
                 } else {
                     // pass queryResult directly to getResponse 
                     // since queryResult is probably a statusCode at this point

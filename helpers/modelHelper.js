@@ -78,7 +78,9 @@ export async function create(model, options) {
             })
             .catch(e => { 
                 if ( e && e.code === 11000 ) {
-                    return 'duplicate'
+                    const duplicate_key = Object.keys(e.keyValue)[0]
+
+                    return { status: 400, message: `${duplicate_key} already exists, try again with a unique value.` }
                 } else {
                     console.log(e) 
                 
