@@ -77,9 +77,13 @@ export async function create(model, options) {
                 }
             })
             .catch(e => { 
-                console.log(e) 
+                if ( e && e.code === 11000 ) {
+                    return 'duplicate'
+                } else {
+                    console.log(e) 
                 
-                return 500
+                    return 500
+                }
             })
     } else {
         return 'duplicate'
