@@ -32,19 +32,35 @@ export async function find(model, options) {
                 return 500
             })
     } else if (options.type == 'all') {
-        return await model.find()
-            .then((response) => {
-                if (response) {
-                    return response
-                } else {
-                    return 404
-                }
-            })
-            .catch((e) => {
-                //console.log(e)
+        if (options.data) {
+            return await model.find(options.data)
+                .then((response) => {
+                    if (response) {
+                        return response
+                    } else {
+                        return 404
+                    }
+                })
+                .catch((e) => {
+                    //console.log(e)
 
-                return 500
-            })
+                    return 500
+                })
+        } else {
+            return await model.find()
+                .then((response) => {
+                    if (response) {
+                        return response
+                    } else {
+                        return 404
+                    }
+                })
+                .catch((e) => {
+                    //console.log(e)
+
+                    return 500
+                })
+        }
     } else if (options.type == 'count') {
         return await model.countDocuments()
             .then((response) => {

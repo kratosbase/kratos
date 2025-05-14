@@ -95,7 +95,7 @@ export default class Router {
             } else {
                 const queryResult = await this.#queryDB(type, req, resourceObj.model, {
                     id: (value.id) ? value.id : undefined,
-                    type: (param == '/:id' || Object.keys(value).length !== 0) ? 'one' :  (param == '/count') ? 'count' : 'all',
+                    type: (param == '/:id') ? 'one' :  (param == '/count') ? 'count' : 'all',
                     data: value
                 })
 
