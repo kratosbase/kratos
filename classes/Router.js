@@ -53,7 +53,7 @@ export default class Router {
             const endpoint = this.#getBaseEndpoint(req)
 
             // Log the request
-            console.log(`${type} /${this.#getEndpoint(req)}${(req.params.id) ? '/' + req.params.id : ''}`)
+            console.log(`${type} /${this.#getEndpoint(req)}${(req.params.id) ? '/' : ''}`)
             
             // resource Object
             const resourceObj = this.#getresource(endpoint)
@@ -75,9 +75,7 @@ export default class Router {
 
             // Validation rules
             const resourceValidationRules = requestValidationRules.rules
-            const localValidationRules = (param && param == '/:id') ? {
-                id: Joi.string().trim().required()
-            } : {}
+            const localValidationRules = {}
 
             // Merge both validation rules
             const validationRules = this.#mergeObjects(resourceValidationRules, localValidationRules)
@@ -94,7 +92,7 @@ export default class Router {
                 return res.status(400).send({ status: 400, message: error.details[0].message })
             } else {
                 const queryResult = await this.#queryDB(type, req, resourceObj.model, {
-                    id: (value.id) ? value.id : undefined,
+                    id: (value.id) ? value.id : (req.params.id) ? req.params.id : undefined,
                     type: (param == '/:id') ? 'one' :  (param == '/count') ? 'count' : 'all',
                     data: value
                 })

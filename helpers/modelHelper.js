@@ -13,7 +13,7 @@ export async function find(model, options) {
                 }
             })
             .catch((e) => {
-                //console.log(e)
+                console.log(e)
 
                 return 500
             })
@@ -27,7 +27,7 @@ export async function find(model, options) {
                 }
             })
             .catch((e) => {
-                //console.log(e)
+                console.log(e)
 
                 return 500
             })
@@ -56,7 +56,7 @@ export async function find(model, options) {
                     }
                 })
                 .catch((e) => {
-                    //console.log(e)
+                    console.log(e)
 
                     return 500
                 })
@@ -126,11 +126,11 @@ export async function update(model, options) {
         if (response.modifiedCount == 1) {
             return 200
         } else {
-            return 400
+            return 404
         }
     })
     .catch(e => {
-        //console.log(e)
+        console.log(e)
         return 500
     })
 }
