@@ -54,7 +54,7 @@ export default class Kratos {
      * @param {Object} defaultRouter Default router object
      * @param {Object} customRouter Custom router object (optional)
      */
-    launch(defaultRouter, customRouter) {
+    async launch(defaultRouter, customRouter) {
         // Initialize middlewares
         this.#initMiddlewares(this.#app)
 

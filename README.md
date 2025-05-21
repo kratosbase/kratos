@@ -13,7 +13,7 @@ Build super-fast & scalable RESTful APIs in minutes. For [Node.js](https://nodej
 To install run:
 
 ```bash
-npm i @kratosbase/kratos@0.10.1
+npm i @kratosbase/kratos@0.10.6
 ```
 
 To spin up an application, first you need to create a resource file.
