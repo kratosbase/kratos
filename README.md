@@ -211,7 +211,7 @@ const User = {
 | :-------- | :------- | :------------------------- |
 | `/{resource}` | `GET/POST/PATCH/DELETE` | Resource base endpoint
 | `/{resource}/{id}` | `GET/POST/PATCH/DELETE` | Resource single-item endpoint
-| `/{resource}/count` | `GET` | Returns data containing total count of documents in resource's collection
+| `/{resource}/count` | `GET` | Returns data containing total count of documents in resource's collection (accepts query params like /products/count?size=xxl)
 
 ## Philosophy
 As an indie hacker, I didn't want to repeatedly write queries and routing + wanted something I could spin up quickly for any project (scalable and minimalistic) while I focus mostly on the frontend. The other frameworks I found were either too robust or had bad design patterns... that's how I ended up building this.
