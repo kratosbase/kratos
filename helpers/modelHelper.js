@@ -62,19 +62,31 @@ export async function find(model, options) {
                 })
         }
     } else if (options.type == 'count') {
-        return await model.countDocuments()
-            .then((response) => {
-                if (response) {
+        if (options.data) {
+            return await model.where(options.data).countDocuments()
+                .then((response) => {
                     return { 'count': response }
-                } else {
-                    return { 'count': 0 }
-                }
-            })
-            .catch((e) => {
-                // console.log(e)
+                })
+                .catch((e) => {
+                    // console.log(e)
 
-                return 500
-            })
+                    return 500
+                })
+        } else {
+            return await model.countDocuments()
+                .then((response) => {
+                    if (response) {
+                        return { 'count': response }
+                    } else {
+                        return { 'count': 0 }
+                    }
+                })
+                .catch((e) => {
+                    // console.log(e)
+
+                    return 500
+                })
+        }
     } else {
         return false
     }
