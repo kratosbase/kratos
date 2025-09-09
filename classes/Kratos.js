@@ -15,6 +15,8 @@ const packageJson = require('./../package.json')
 
 import crypto from 'crypto'
 
+let isConnected = false;
+
 /**
  * Kratos class
  */
@@ -209,9 +211,15 @@ export default class Kratos {
     async #initDB() {
         console.log(this.#consoleColor, 'Initializing database connection...')
 
+        if (isConnected) return;
+
         return await mongoose
             .connect(this.db_server)
             .then((response) => {
+                isConnected = true;
+                
+                console.log(this.#consoleColor, 'Database connected successfully');
+                
                 return response
             })
             .catch((err) => {
