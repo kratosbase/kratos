@@ -48,6 +48,7 @@ export default class Kratos {
         this.show_secret = (this.config.show_secret) ? this.config.show_secret : false
         this.jwt_secret = (this.config.jwt_secret) ? this.config.jwt_secret : crypto.randomBytes(32).toString('hex')
         this.unprotected_routes = (this.config.unprotected_routes) ? this.config.unprotected_routes : []
+        this.upload_limit = (this.config.upload_limit) ? this.config.upload_limit : '2mb'
     }
 
     /**
@@ -173,8 +174,8 @@ export default class Kratos {
             optionsSuccessStatus: 200
         }))
     
-        app.use(express.json({ limit: '2mb' }))
-        app.use(express.urlencoded({ extended: true, limit: '2mb' }))
+        app.use(express.json({ limit: this.upload_limit }))
+        app.use(express.urlencoded({ extended: true, limit: this.upload_limit }))
     
         app.use(
             helmet({

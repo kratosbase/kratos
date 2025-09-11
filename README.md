@@ -116,6 +116,7 @@ const app = new Kratos({
 | `jwt_secret` | `string` |  Set custom JWT secret | random string
 | `maintenance` | `boolean` | Set maintenance mode | false
 | `unprotected_routes` | `array` | Set list of routes to bypass auth | []
+| `upload_limit` | `string` | Set upload limit | '2mb'
 
 ### Router class initialization
 #### example:
