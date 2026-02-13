@@ -174,7 +174,10 @@ export default class Kratos {
             optionsSuccessStatus: 200
         }))
     
-        app.use(express.json({ limit: this.upload_limit }))
+        app.use(express.json({ limit: this.upload_limit, verify: (req, res, buf) => {
+            req.rawBody = buf
+        }}))
+
         app.use(express.urlencoded({ extended: true, limit: this.upload_limit }))
     
         app.use(
