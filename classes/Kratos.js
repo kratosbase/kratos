@@ -9,6 +9,7 @@ import index from '../routes/index.js'
 import token from '../routes/token.js'
 import auth from './../middlewares/auth.js'
 import { createRequire } from 'module'
+import http from 'http'
 
 const require = createRequire(import.meta.url)
 const packageJson = require('./../package.json')
@@ -23,6 +24,8 @@ let isConnected = false;
 export default class Kratos {
     #app = express()
     #consoleColor = '\x1b[36m%s\x1b[0m'
+
+    #server = null
 
     #localConfig = {
         port: this.#generatePort(),
@@ -57,21 +60,24 @@ export default class Kratos {
      * @param {Object} defaultRouter Default router object
      * @param {Object} customRouter Custom router object (optional)
      */
-    launch(defaultRouter, customRouter) {
-        // Initialize middlewares
+    async launch(defaultRouter, customRouter) {
         this.#initMiddlewares(this.#app)
-
-        // Initialize config
         this.#initConfig(this.#app)
-
-        // Initialize routers
         this.#initRoutes(this.#app, defaultRouter, customRouter)
 
-        // Initialize DB
-        this.#initDB(this.#app)
-        .then(() => {
-            this.#app.listen(this.port, () => console.log(`Kratos app is running on port: ${this.port}`))
+        await this.#initDB()
+
+        this.#server = http.createServer(this.#app)
+
+        this.#server.listen(this.port, () => {
+            console.log(`Kratos app is running on port: ${this.port}`)
         })
+
+        return this
+    }
+
+    getServer() {
+        return this.#server
     }
 
     /**
