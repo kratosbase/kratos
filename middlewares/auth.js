@@ -34,5 +34,17 @@ function endpoint(path) {
 }
 
 function path_in_paths(path, paths) {
-    return paths.find(route => route == path)
+    return paths.some(route => {
+        if (route.endsWith('/**')) {
+            const prefix = route.slice(0, -3)
+            return path.startsWith(prefix)
+        }
+
+        if (route.endsWith('/*')) {
+            const prefix = route.slice(0, -2)
+            return path.startsWith(prefix) && path !== prefix
+        }
+
+        return route === path
+    })
 }
